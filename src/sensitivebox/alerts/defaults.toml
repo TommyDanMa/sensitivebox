@@ -1,0 +1,126 @@
+# Default rules shipped with Sensitive Box (docs/BIBLE.md, "Alerting" → "Default rules").
+#
+# Signals are hwmon sensor IDs (<chip>/<bus id>/<channel>) or system signals that the daemon
+# publishes (Prompt 3):
+#   psi/memory/some_avg10, psi/memory/full_avg10   PSI, %
+#   memory/available_pct                            MemAvailable / MemTotal, %
+#   vmstat/oom_kill_delta                           OOM kills since the previous poll
+#   power_supply/<name>/capacity, …/status          battery %, "Charging"/"Discharging"/…
+#   power_supply/<ucsi-source-psy-…>/power_w        negotiated USB-C power; only for online
+#                                                   ports, so an empty port is MISSING, not 0 W
+# Copy a rule into ~/.config/sensitivebox/rules.toml with the same id to override it.
+
+[[rule]]
+id = "cpu-hot"
+name = "CPU hot"
+sensor = ["k10temp/*/temp1", "coretemp/*/temp1"]
+when = "above"
+value = 90.0
+for = "10s"
+clear = 85.0
+on_missing = "alert"   # a vanished CPU sensor is worth knowing about, at info severity
+severity = "critical"
+
+[[rule]]
+id = "gpu-hot"
+name = "GPU hot"
+sensor = "amdgpu/*/temp1"   # edge
+when = "above"
+value = 85.0
+for = "10s"
+clear = 80.0
+severity = "warning"
+
+[[rule]]
+id = "nvme-near-limit"
+name = "NVMe near limit"
+sensor = "nvme/*/temp1"   # Composite
+when = "above"
+value = "max-5"   # the drive's own temp1_max
+for = "30s"
+clear = "max-10"
+severity = "warning"
+
+[[rule]]
+id = "wifi-chip-hot"
+name = "Wi-Fi chip hot"
+sensor = ["mt79*/*/temp1", "iwlwifi*/*/temp1"]
+when = "above"
+value = 75.0
+for = "60s"
+clear = 70.0
+severity = "info"
+
+# TODO(v1.1, compound rules): "Fan stalled": any fan = 0 RPM while CPU > 70 °C for 15 s,
+# mode = "any", critical. A fan at 0 RPM on its own is a normal idle stop.
+
+[[rule]]
+id = "memory-pressure"
+name = "Memory pressure"
+sensor = "psi/memory/some_avg10"
+when = "above"
+value = 20.0
+for = "30s"
+clear = 10.0
+severity = "warning"
+
+[[rule]]
+id = "memory-stall"
+name = "Memory stall"
+sensor = "psi/memory/full_avg10"
+when = "above"
+value = 5.0
+for = "10s"
+clear = 2.0
+severity = "critical"
+
+[[rule]]
+id = "low-memory"
+name = "Low memory"
+sensor = "memory/available_pct"
+when = "below"
+value = 10.0
+for = "30s"
+clear = 15.0
+severity = "warning"
+
+[[rule]]
+id = "oom-kill"
+name = "App killed (OOM)"
+sensor = "vmstat/oom_kill_delta"
+when = "above"
+value = 0
+mode = "any"
+on_missing = "close"
+severity = "critical"
+
+# "Data used today" is off by default. To enable it, add to rules.toml, e.g.:
+# [[rule]]
+# id = "data-today"
+# name = "Data used today"
+# sensor = "net/*/rx_today_gb"
+# when = "above"
+# value = 20.0
+# severity = "info"
+
+[[rule]]
+id = "battery-low"
+name = "Battery low"
+sensor = "power_supply/{battery}/capacity"   # {battery} binds the guard to the same battery
+when = "below"
+value = 15.0
+clear = 20.0
+on_missing = "close"
+severity = "warning"
+only_if = { signal = "power_supply/{battery}/status", equals = "Discharging" }
+
+[[rule]]
+id = "slow-charger"
+name = "Slow charger"
+sensor = "power_supply/ucsi-source-psy-*/power_w"
+when = "below"
+value = 15.0   # below 15 W; the trigger is strict, so exactly 15 W does not fire
+for = "30s"
+on_missing = "close"
+severity = "info"
+only_if = { signal = "power_supply/BAT*/status", equals = "Charging" }

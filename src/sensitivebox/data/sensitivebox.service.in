@@ -1,0 +1,11 @@
+[Unit]
+Description=Sensitive Box read-only hardware monitor
+
+[Service]
+ExecStart=@EXECUTABLE@ watch
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+
+[Install]
+WantedBy=default.target

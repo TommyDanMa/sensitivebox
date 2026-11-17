@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Sensitive Box
+Comment=Local hardware monitoring and alerts
+Exec=@EXECUTABLE@ open
+Icon=sensitivebox
+Terminal=false
+Categories=System;Monitor;

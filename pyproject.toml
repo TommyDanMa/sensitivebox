@@ -1,0 +1,90 @@
+[build-system]
+requires = ["uv_build>=0.10.4,<0.11"]
+build-backend = "uv_build"
+
+[project]
+name = "sensitivebox"
+version = "0.1.0"
+description = "Read-only Linux hwmon sensor daemon with alerting and a neo-skeuomorphic local web UI."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.12"
+dependencies = [
+    "dbus-fast>=5.2,<6",
+    "msgspec>=0.19,<1",
+    "starlette>=1.10.0",
+    "uvicorn>=0.54.0",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Monitoring",
+    "Typing :: Typed",
+]
+
+[project.scripts]
+sensitivebox = "sensitivebox.cli:main"
+sbox = "sensitivebox.cli:main"
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pyright",
+    "pytest",
+    "ruff",
+]
+
+[tool.uv]
+default-groups = ["dev"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = [
+    "src",
+    "tests",
+]
+extend-exclude = [
+    ".agents",
+    ".claude",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "W",
+    "I",
+    "UP",
+    "B",
+    "SIM",
+    "RUF",
+    "ASYNC",
+    "S",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101"]
+
+[tool.pyright]
+pythonVersion = "3.12"
+include = [
+    "src",
+    "tests",
+]
+strict = ["src"]
+typeCheckingMode = "standard"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+norecursedirs = [
+    "fixtures",
+    ".*",
+    "__pycache__",
+]
