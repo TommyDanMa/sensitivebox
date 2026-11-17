@@ -15,10 +15,10 @@ sbox open
 ```
 
 `uv tool install sensitivebox` is the PyPI install. The same wheel is attached to the
-[v0.1.0 GitHub release](https://github.com/JonDanMa/sensitivebox/releases/tag/v0.1.0):
+[v0.1.0 GitHub release](https://github.com/TommyDanMa/sensitivebox/releases/tag/v0.1.0):
 
 ```sh
-uv tool install "https://github.com/JonDanMa/sensitivebox/releases/download/v0.1.0/sensitivebox-0.1.0-py3-none-any.whl"
+uv tool install "https://github.com/TommyDanMa/sensitivebox/releases/download/v0.1.0/sensitivebox-0.1.0-py3-none-any.whl"
 ```
 
 End users do not need Node. The release wheel contains the built dashboard.
